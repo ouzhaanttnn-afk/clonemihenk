@@ -1093,10 +1093,11 @@ function ShopDock({
     return (
       <DecisionDock
         idle
+        hideSummary
         summaryLabel="Kuyruk"
         summaryValue={hasQueue ? `${s.queue.length} müşteri bekliyor` : 'Müşteri bekleniyor'}
         primary={{
-          label: hasQueue ? 'Müşteriyi Karşıla' : 'Müşteri bekleniyor',
+          label: hasQueue ? `Müşteriyi Karşıla · ${s.queue.length}` : 'Müşteri bekleniyor',
           onPress: s.greetCustomer,
           disabled: !hasQueue,
         }}

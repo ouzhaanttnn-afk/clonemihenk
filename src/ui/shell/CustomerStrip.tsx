@@ -39,16 +39,15 @@ function tieTone(record: CustomerRecord): 'good' | 'bad' | 'neutral' {
 export function CustomerStrip({ customer, record, queueLength, lineCount, broughtItems }: Props) {
   if (!customer) {
     return (
-      <div className="customerStrip">
+      <div className="customerStrip customerStrip--idle">
         <span className="customerStrip__avatar">
           <IconQueue size={18} />
         </span>
         <div className="customerStrip__main">
           <div className="customerStrip__name">
-            {queueLength > 0 ? `Bekleyen: ${queueLength} müşteri` : 'Yeni müşteri bekleniyor'}
-          </div>
-          <div className="customerStrip__intent">
-            {queueLength > 0 ? 'Karşılamak için hazır' : 'Kapı açık — gün akıyor'}
+            {queueLength > 0
+              ? `${queueLength} müşteri bekliyor · Karşılamaya hazır`
+              : 'Yeni müşteri bekleniyor · Kapı açık'}
           </div>
         </div>
       </div>
