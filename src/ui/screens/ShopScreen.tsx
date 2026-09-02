@@ -674,13 +674,12 @@ function IdleWorkbench({ coaching }: { coaching: boolean }) {
 }
 
 /**
- * Bekleme kuyruğu mevcut FIFO davranışını görünür kılar. Yalnız ilk müşteri
- * karşılanabilir; sonraki kartlar sırayı bozacak sahte bir eylem sunmaz.
+ * Bekleme kuyruğu mevcut FIFO davranışını görünür kılar. Karşılama eylemi
+ * yalnız alttaki karar alanında bulunur; kartlar müşteri bilgisini taşır.
  */
 function WaitingCustomerQueue() {
   const queue = useGame((s) => s.queue);
   const capacity = useGame((s) => queueCapacity(s.store));
-  const greetCustomer = useGame((s) => s.greetCustomer);
   const [expanded, setExpanded] = useState(false);
   const visibleQueue = expanded ? queue : queue.slice(0, 1);
 
@@ -732,12 +731,6 @@ function WaitingCustomerQueue() {
                   <span>Bekliyor</span>
                 </div>
               </div>
-
-              {isNext && (
-                <button type="button" className="waitingCustomer__greet" onClick={greetCustomer}>
-                  Karşıla
-                </button>
-              )}
             </article>
           );
         })}
