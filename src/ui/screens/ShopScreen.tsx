@@ -197,15 +197,16 @@ export function ShopScreen() {
 
       <MarketStrip market={s.market} onOpenMarket={() => s.setTab('business')} />
 
-      <CustomerStrip
-        customer={s.activeCustomer}
-        record={s.activeCustomer ? (s.customers[s.activeCustomer.id] ?? null) : null}
-        queueLength={s.queue.length}
-        lineCount={deal?.lines.length ?? 0}
-        broughtItems={
-          deal ? deal.lines.map((l) => s.items[l.itemId]).filter((i): i is ItemInstance => !!i) : []
-        }
-      />
+      {s.activeCustomer && (
+        <CustomerStrip
+          customer={s.activeCustomer}
+          record={s.customers[s.activeCustomer.id] ?? null}
+          lineCount={deal?.lines.length ?? 0}
+          broughtItems={
+            deal ? deal.lines.map((l) => s.items[l.itemId]).filter((i): i is ItemInstance => !!i) : []
+          }
+        />
+      )}
 
       {deal && (
         <>

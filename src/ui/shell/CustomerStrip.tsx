@@ -10,17 +10,15 @@
 import { MEMORY } from '@domain/balance';
 import { loyaltyEffects, type CustomerRecord } from '@domain/customer-memory';
 import { getArchetype } from '@data/archetypes';
-import { IconQueue } from '@ui/icons';
 import { Art } from '@ui/Art';
 import { customerArt } from '@ui/assets';
 import { customerIntentLine } from '@ui/intent-line';
 import type { Customer, ItemInstance } from '@domain/types';
 
 interface Props {
-  customer: Customer | null;
+  customer: Customer;
   /** GDD 10 — bu müşterinin kalıcı kaydı; yeni müşteride null. */
   record?: CustomerRecord | null;
-  queueLength: number;
   lineCount: number;
   /**
    * Müşterinin GETİRDİĞİ kalemler. Niyet cümlesi ürünü adıyla anmak için
@@ -36,24 +34,7 @@ function tieTone(record: CustomerRecord): 'good' | 'bad' | 'neutral' {
   return 'neutral';
 }
 
-export function CustomerStrip({ customer, record, queueLength, lineCount, broughtItems }: Props) {
-  if (!customer) {
-    return (
-      <div className="customerStrip customerStrip--idle">
-        <span className="customerStrip__avatar">
-          <IconQueue size={18} />
-        </span>
-        <div className="customerStrip__main">
-          <div className="customerStrip__name">
-            {queueLength > 0
-              ? `${queueLength} müşteri bekliyor · Karşılamaya hazır`
-              : 'Yeni müşteri bekleniyor · Kapı açık'}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+export function CustomerStrip({ customer, record, lineCount, broughtItems }: Props) {
   const archetype = getArchetype(customer.archetype);
   const initial = customer.displayName.charAt(0);
 

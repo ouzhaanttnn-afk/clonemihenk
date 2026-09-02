@@ -43,6 +43,7 @@ export function App() {
     ]);
     return ids.size;
   });
+  const shopQueueCount = useGame((s) => s.queue.length);
 
   // v5 resumes active negotiations and deterministic queue state, not just a day checkpoint.
   useEffect(() => {
@@ -83,7 +84,12 @@ export function App() {
           {tab === 'business' && <BusinessScreen />}
         </div>
 
-        <BottomNav active={tab} onSelect={setTab} workshopBadge={workshopAttention} />
+        <BottomNav
+          active={tab}
+          onSelect={setTab}
+          shopBadge={shopQueueCount}
+          workshopBadge={workshopAttention}
+        />
         <DayCloseDialog />
 
         {/*
