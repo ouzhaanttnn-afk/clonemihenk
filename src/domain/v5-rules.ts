@@ -1,6 +1,6 @@
 import { Rng, deriveSeed } from './rng';
 import type { StoreState } from './types';
-import { isLastTradingDay, weekdayLabel } from './calendar';
+import { weekdayLabel } from './calendar';
 
 /** Integer milligrams are the physical source of truth. TL is rounded only at payment. */
 export const toMg = (grams: number): number => Math.round(grams * 1000);
@@ -41,5 +41,5 @@ export function dailyPurchaseMix(seed: number, day: number) {
   const y = new Rng(deriveSeed(seed, 'dailyPurchaseMix', day)).int(0, 15);
   return { y, bullion: (67 + y) / 100, crafted: (33 - y) / 100 };
 }
-/** No weekday existed in v1: day 1 is Monday; day 5, 12, 19 ... are Fridays. */
-export const isHasTradingDay = (day: number): boolean => Number.isInteger(day) && day > 0 && isLastTradingDay(day);
+/** Toptancı HAS masası her oyun günü açıktır; yalnız geçersiz günleri reddeder. */
+export const isHasTradingDay = (day: number): boolean => Number.isInteger(day) && day > 0;

@@ -404,7 +404,7 @@ function HasCounter() {
     <div className="group__body v5Controls">
       <p>Saflık 1.000 · Değer {tl(fromMg(s.store.hasBalanceMg ?? 0) * s.market.goldSpot)}</p>
       <p>Toptancıdan al {tl(quote.buy)}/g · Toptancıya sat {tl(quote.sell)}/g</p>
-      <p>{open ? 'Cuma: HAS işlemleri açık.' : 'Miktarı şimdi seçebilirsiniz; alım-satım onayı yalnız cuma günü açılır.'}</p>
+      <p>{open ? 'Toptancı HAS masası her gün alış ve satışa açık.' : 'Geçersiz işlem günü.'}</p>
       <div role="group" aria-label="HAS işlem yönü">
         <button type="button" className="chip" aria-pressed={side === 'buy'} onClick={() => changeSide('buy')}>HAS Al</button>
         <button type="button" className="chip" aria-pressed={side === 'sell'} onClick={() => changeSide('sell')}>HAS Sat</button>

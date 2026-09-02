@@ -109,7 +109,7 @@ describe('HAS slider-compatible existing precision and limits', () => {
     expect(sold.applied).toBe(true);
     expect(sold.state.store.hasBalanceMg).toBe(0);
   });
-  it('MAX buy and all-sell enforce cash/balance and Friday including overshoot', () => {
+  it('MAX buy and all-sell enforce cash/balance on every day including overshoot', () => {
     const s = useGame.getState(), quote = hasQuote(s.market, s.store);
     const max = maxHasBuyMg(s.store.cash, quote.buy);
     expect(tradeHas(s, s.market, 'buy', max + 1, 'over').applied).toBe(false);
@@ -117,6 +117,6 @@ describe('HAS slider-compatible existing precision and limits', () => {
     expect(bought.applied).toBe(true);
     expect(tradeHas(bought.state, s.market, 'sell', max + 1, 'over-sell').applied).toBe(false);
     expect(tradeHas(bought.state, s.market, 'sell', max, 'all').state.store.hasBalanceMg).toBe(0);
-    expect(tradeHas(s, { ...s.market, day: 6 }, 'buy', 1000, 'saturday').applied).toBe(false);
+    expect(tradeHas(s, { ...s.market, day: 6 }, 'buy', 1000, 'saturday').applied).toBe(true);
   });
 });
