@@ -159,7 +159,7 @@ function BusinessRoot({ onOpen }: { onOpen: (r: Route) => void }) {
           >
             <span className="personnelDisclosure__icon"><IconBusiness size={18} /></span>
             <span className="personnelDisclosure__copy">
-              <strong>Kuyruk Personeli</strong>
+              <strong>Personel</strong>
               <small>{personnelCount(s.store)} personel · Kapasite {queueCapacity(s.store)} · Günlük {tl(personnelDaily(s.store))}</small>
             </span>
             <span className={`personnelDisclosure__chevron ${personnelOpen ? 'personnelDisclosure__chevron--open' : ''}`} aria-hidden="true">⌄</span>
@@ -169,9 +169,14 @@ function BusinessRoot({ onOpen }: { onOpen: (r: Route) => void }) {
             <p>Aylık {tl(PERSONNEL_MONTHLY[personnelCount(s.store)]!)} · Günlük {tl(personnelDaily(s.store))}</p>
             <p>Maaşlar kişi başına eklenir: {PERSONNEL_SALARIES.map(salary => tl(salary)).join(' + ')} / ay.</p>
             <p>Yalnız bekleme kapasitesini artırır; müşteri geliş hızını veya atölyeyi değiştirmez.</p>
-            {[0, 1, 2, 3].map(count => <button key={count} type="button" className="chip" aria-pressed={personnelCount(s.store) === count}
-              disabled={!canSetPersonnel(s.store, count)}
-              onClick={() => setPendingPersonnel(count)}>{count} personel{count > 0 ? ` · Sv ${PERSONNEL_UNLOCK_LEVELS[count]}` : ''}</button>)}
+            <div className="personnelChoiceRow" role="group" aria-label="Personel sayısı">
+              {[0, 1, 2, 3].map(count => <button key={count} type="button" className="personnelChoice" aria-pressed={personnelCount(s.store) === count}
+                aria-label={`${count} personel${count > 0 ? `, seviye ${PERSONNEL_UNLOCK_LEVELS[count]} gerektirir` : ''}`}
+                disabled={!canSetPersonnel(s.store, count)}
+                onClick={() => setPendingPersonnel(count)}>
+                <strong>{count}</strong><small>{count > 0 ? `Sv ${PERSONNEL_UNLOCK_LEVELS[count]}` : 'Başlangıç'}</small>
+              </button>)}
+            </div>
             {pendingPersonnel !== null && <div role="group" aria-label="Personel onayı">
               <p>{pendingPersonnel} personel · aylık toplam {tl(PERSONNEL_MONTHLY[pendingPersonnel]!)}. Günlük gider kapanışta tahsil edilir.</p>
               <button type="button" className="chip" onClick={() => { s.setPersonnelCount(pendingPersonnel); setPendingPersonnel(null); }}>Personeli Onayla</button>

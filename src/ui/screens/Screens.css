@@ -370,6 +370,34 @@
   box-shadow: inset 3px 0 0 var(--amethyst-500);
 }
 
+.personnelChoiceRow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: var(--sp-2);
+}
+
+.personnelChoice {
+  min-width: 0;
+  min-height: var(--touch-min);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  padding: 5px 2px;
+  border: 1px solid var(--page-line);
+  border-radius: var(--r-sm);
+  background: rgba(8, 13, 20, 0.72);
+  color: var(--text-dark-2);
+  font: inherit;
+}
+
+.personnelChoice strong { font-size: var(--fs-label); line-height: 1; }
+.personnelChoice small { color: var(--text-dark-3); font-size: 9px; white-space: nowrap; }
+.personnelChoice[aria-pressed='true'] { border-color: var(--brass-400); background: rgba(196, 141, 43, 0.15); color: var(--brass-300); }
+.personnelChoice:disabled { opacity: 0.42; }
+
 .statLine {
   display: flex;
   align-items: center;
