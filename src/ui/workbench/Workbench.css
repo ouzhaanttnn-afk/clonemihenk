@@ -1046,6 +1046,37 @@
   vertical-align: middle;
 }
 
+.shopOverview__toggle {
+  width: 100%;
+  min-height: var(--touch-min);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.shopOverview__toggle .idle__headText { flex: 1; }
+
+.shopOverview__chevron {
+  flex: 0 0 auto;
+  color: var(--brass-400);
+  font-size: 22px;
+  line-height: 1;
+  transform: rotate(0deg);
+  transition: transform var(--t-fast) var(--ease-standard);
+}
+
+.shopOverview__chevron--open { transform: rotate(180deg); }
+
+.shopOverview__details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
 .shopTalentButton {
   width: 100%;
   min-height: var(--touch-min);

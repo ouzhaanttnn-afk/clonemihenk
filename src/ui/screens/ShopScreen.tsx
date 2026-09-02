@@ -483,6 +483,7 @@ function QuickStockSheet({ onClose }: { onClose: () => void }) {
 function IdleWorkbench({ coaching }: { coaching: boolean }) {
   const s = useGame();
   const [talentTreeOpen, setTalentTreeOpen] = useState(false);
+  const [shopOverviewOpen, setShopOverviewOpen] = useState(false);
   const liquidity = selectors.liquidity(s);
   const band = selectors.liquidityBand(s);
 
@@ -559,7 +560,13 @@ function IdleWorkbench({ coaching }: { coaching: boolean }) {
         gerçeğini açmaz; hepsi zaten oyuncunun kendi stoğunun toplamıdır.
       */}
       <section className="shopOverview" aria-label="Dükkan kimliği ve mali durum">
-        <div className="idle__head">
+        <button
+          type="button"
+          className="idle__head shopOverview__toggle"
+          onClick={() => setShopOverviewOpen((open) => !open)}
+          aria-expanded={shopOverviewOpen}
+          aria-controls="shop-overview-details"
+        >
           <Art
             art={NAV_ART.shop}
             size={56}
@@ -573,18 +580,22 @@ function IdleWorkbench({ coaching }: { coaching: boolean }) {
               {s.playerMarket.equipped.shopBadge && <span className="idle__badge" title="Market profil rozeti">◆</span>}
             </h2>
             <p className="idle__sub">
-              Gün {s.market.day} · {weekdayLabel(s.market.day)} · Semt itibarı {Math.round(s.store.reputation)}
+              {shopOverviewOpen
+                ? `Gün ${s.market.day} · ${weekdayLabel(s.market.day)} · Semt itibarı ${Math.round(s.store.reputation)}`
+                : 'Dükkan ve finans özetini göster'}
             </p>
           </div>
-        </div>
-
-        <button type="button" className="shopTalentButton" onClick={() => setTalentTreeOpen(true)}>
-          <span><IconBusiness size={18} /> Yetenek Ağacı</span>
-          <small>Ayar %{Math.round(s.skillProgress.assayAccuracyRank === 0 ? 60 : 60 + s.skillProgress.assayAccuracyRank * 10)} · Tatlı Dil {s.skillProgress.tatliDilLevel}/3</small>
-          <span aria-hidden="true">›</span>
+          <span className={`shopOverview__chevron ${shopOverviewOpen ? 'shopOverview__chevron--open' : ''}`} aria-hidden="true">⌄</span>
         </button>
 
-        <button type="button" className="position" onClick={() => s.setTab('stock')}>
+        {shopOverviewOpen ? <div className="shopOverview__details" id="shop-overview-details">
+          <button type="button" className="shopTalentButton" onClick={() => setTalentTreeOpen(true)}>
+            <span><IconBusiness size={18} /> Yetenek Ağacı</span>
+            <small>Ayar %{Math.round(s.skillProgress.assayAccuracyRank === 0 ? 60 : 60 + s.skillProgress.assayAccuracyRank * 10)} · Tatlı Dil {s.skillProgress.tatliDilLevel}/3</small>
+            <span aria-hidden="true">›</span>
+          </button>
+
+          <button type="button" className="position" onClick={() => s.setTab('stock')}>
           <span className="position__cell">
             <span className="position__icon" aria-hidden="true"><IconCash size={15} /></span>
             <span className="position__copy">
@@ -617,7 +628,8 @@ function IdleWorkbench({ coaching }: { coaching: boolean }) {
             Altın %{metalShare} · Nakit %{100 - metalShare}
             <span className="position__go">Stok ›</span>
           </span>
-        </button>
+          </button>
+        </div> : null}
       </section>
 
       {!s.inventory.some(p => {
