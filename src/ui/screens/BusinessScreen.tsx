@@ -26,7 +26,7 @@ import { marketSignals } from '@domain/overnight';
 import { registrySummary } from '@domain/customer-memory';
 import { evaluateUpgrade, growthSnapshot } from '@domain/store-growth';
 import { intentAlarm } from '@domain/intent';
-import { bullionMeta, isBullion } from '@data/bullion';
+import { bullionMeta } from '@data/bullion';
 import { TEST_TOOLS } from '@data/tools';
 import { spawnItem } from '@domain/item-spawn';
 import { readSaveSummary } from '@state/save';
@@ -36,8 +36,6 @@ import {
   financeRate,
   financeTerms,
   affordableQuantity,
-  quoteLiquidation,
-  recommendedSlices,
   supplyOffer,
   usedLimit,
 } from '@domain/wholesaler';
@@ -49,11 +47,7 @@ import {
   networkLiquidationOffer,
   networkLoanOffer,
 } from '@domain/trade-network';
-import type {
-  InventoryPosition,
-  ItemInstance,
-  TradeNetworkMember,
-} from '@domain/types';
+import type { ItemInstance, TradeNetworkMember } from '@domain/types';
 import { selectors, useGame } from '@state/gameStore';
 
 import {
@@ -69,6 +63,7 @@ import { Art } from '@ui/Art';
 import { NAV_ART, merchantArt } from '@ui/assets';
 import { clock, pct, pctChange, price, tl, tlSigned } from '@ui/format';
 import { TalentTreePanel } from './TalentTreePanel';
+import { WholesalerLiquidationList } from './WholesalerLiquidation';
 
 type Route = 'root' | 'market' | 'journal' | 'wholesaler' | 'network' | 'store' | 'career' | 'save';
 
@@ -424,12 +419,6 @@ function WholesalerRoute({ onBack }: { onBack: () => void }) {
   const used = usedLimit(s.store.supplier);
   const available = Math.max(0, limit - used);
 
-  // §4.2 — bozulabilir sarrafiye pozisyonları.
-  const liquidatable = s.inventory
-    .filter((p) => p.location !== 'workshop')
-    .map((p) => ({ position: p, item: s.items[p.itemId] }))
-    .filter((r) => !!r.item && isBullion(r.item.templateId));
-
   // §4.1 "uygun ticari kanal üzerinden tedarik" — toptancının sattığı ürünler.
   const probes = SUPPLY_TEMPLATES.map((id) => spawnItem(s.seed, LOT_PROBE_INDEX, id));
 
@@ -502,13 +491,7 @@ function WholesalerRoute({ onBack }: { onBack: () => void }) {
         <div className="group">
           <h2 className="group__title">Toplu bozma</h2>
           <div className="group__body">
-            {liquidatable.length === 0 ? (
-              <p className="emptyNote">Bozulacak sarrafiye yok.</p>
-            ) : (
-              liquidatable.map(({ position, item }) => (
-                <LiquidateRow key={position.itemId} position={position} item={item!} />
-              ))
-            )}
+            <WholesalerLiquidationList />
           </div>
         </div>
 
@@ -614,92 +597,6 @@ function SupplyRow({ probe, today }: { probe: ItemInstance; today: number }) {
           Bu alım yüksek tutarlı. Nakit/vadeli dağılımını kontrol edip bir kez daha onayla.
         </p>
       )}
-    </div>
-  );
-}
-
-/**
- * §4.2 — "tek işlem veya KONTROLLÜ DİLİMLER halinde". Dilim sayısı gerçek bir
- * karardır: fiyat her dilimde kendi hacmiyle hesaplandığı için dilimlemek
- * kapasiteyi aşan tek işlemden daha iyi birim fiyat verir.
- */
-function LiquidateRow({ position, item }: { position: InventoryPosition; item: ItemInstance }) {
-  const s = useGame();
-  const [quantity, setQuantity] = useState(position.quantity);
-  const [slices, setSlices] = useState(1);
-
-  const gramPool = position.poolId === '24K_GRAM_GOLD_POOL';
-  const qty = Math.min(position.quantity, Math.max(gramPool ? .001 : 1, quantity));
-  const quote = quoteLiquidation(
-    { itemId: position.itemId, quantity: qty },
-    s.items,
-    s.inventory,
-    s.market,
-    s.store,
-    slices,
-  );
-  if (!quote) return null;
-
-  const suggested = recommendedSlices(qty, quote.capacityPerSlice);
-  const profit = quote.gross - quote.costBasis;
-
-  return (
-    <div className="lotRow">
-      <div className="lotRow__head">
-        <span className="lotRow__name">
-          {item.displayName}
-          {position.quantity > 1 && ` · stokta ${position.quantity}`}
-        </span>
-        <span className="lotRow__price num">{tl(quote.gross)}</span>
-      </div>
-
-      <div className="lotRow__terms">
-        {quote.grams.toFixed(2)} gr · maliyet {tl(quote.costBasis)} ·{' '}
-        <span className={profit >= 0 ? 'statLine__value--positive' : 'statLine__value--negative'}>
-          {tlSigned(profit)}
-        </span>
-      </div>
-
-      {/* §4.2 "her işlemde mutlak garanti değildir" — fark ölçülür ve söylenir. */}
-      <div className="lotRow__terms">{quote.rationale}</div>
-
-      <div className="lotRow__controls">
-        {(gramPool || position.quantity > 1) && (
-          <label className="lotRow__field">
-            <span>{gramPool ? 'Gram' : position.poolId === '22K_INVESTMENT_BANGLE_POOL' ? '10 g birim' : 'Adet'}</span>
-            <input
-              type="number"
-              min={gramPool ? .001 : 1}
-              step={gramPool ? .001 : 1}
-              max={position.quantity}
-              value={qty}
-              onChange={(e) => setQuantity(Number(e.target.value))}
-            />
-          </label>
-        )}
-        <label className="lotRow__field">
-          <span>Dilim</span>
-          <input
-            type="number"
-            min={1}
-            max={Math.max(1, qty)}
-            value={slices}
-            onChange={(e) => setSlices(Number(e.target.value))}
-          />
-        </label>
-        {suggested > slices && (
-          <button type="button" className="miniBtn" onClick={() => setSlices(suggested)}>
-            {suggested} dilim öner
-          </button>
-        )}
-        <button
-          type="button"
-          className="lotRow__buy"
-          onClick={() => s.liquidateToWholesaler(position.itemId, qty, slices)}
-        >
-          Bozdur
-        </button>
-      </div>
     </div>
   );
 }

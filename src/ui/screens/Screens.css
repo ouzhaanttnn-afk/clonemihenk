@@ -845,6 +845,134 @@
   color: var(--amethyst-500);
 }
 
+.counter--sell .counter__toggle {
+  background: color-mix(in srgb, var(--brass-500) 10%, var(--stone-50));
+  border-left-color: var(--brass-500);
+  color: var(--brass-700);
+}
+
+.counter--sell .counter__chevron {
+  color: var(--brass-600);
+}
+
+.hasCompact {
+  padding: var(--sp-3);
+}
+
+.hasCompact__head,
+.hasCompact__sliderHead,
+.hasCompact__actions,
+.hasCompact__confirm {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+}
+
+.hasCompact__title {
+  margin: 0;
+  color: var(--text-light-1);
+  font-size: var(--fs-label);
+}
+
+.hasCompact__value,
+.hasCompact__quote,
+.hasCompact__sliderHead,
+.hasCompact__confirm {
+  color: var(--text-light-3);
+  font-size: var(--fs-micro);
+}
+
+.hasCompact__quote {
+  text-align: right;
+  line-height: 1.45;
+}
+
+.hasCompact__body {
+  display: grid;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+}
+
+.hasCompact__segments {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.hasCompact__segment,
+.hasCompact__max,
+.hasCompact__continue,
+.hasCompact__confirmButton,
+.hasCompact__cancel {
+  min-height: 44px;
+  border: 1px solid var(--line-light);
+  border-radius: var(--r-sm);
+  background: var(--stone-50);
+  color: var(--text-light-2);
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-semibold);
+}
+
+.hasCompact__segment[aria-pressed="true"] {
+  border-color: var(--brass-500);
+  background: color-mix(in srgb, var(--brass-500) 16%, var(--stone-50));
+  color: var(--brass-700);
+}
+
+.hasCompact__sliderHead strong {
+  color: var(--text-light-1);
+}
+
+.hasCompact__actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+}
+
+.hasCompact__total {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  color: var(--text-light-3);
+  font-size: var(--fs-micro);
+}
+
+.hasCompact__total strong {
+  overflow: hidden;
+  color: var(--text-light-1);
+  font-size: var(--fs-label);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hasCompact__max,
+.hasCompact__continue,
+.hasCompact__confirmButton,
+.hasCompact__cancel {
+  padding: 0 var(--sp-3);
+}
+
+.hasCompact__continue,
+.hasCompact__confirmButton {
+  border-color: var(--brass-500);
+  background: var(--brass-500);
+  color: var(--ink-900);
+}
+
+.hasCompact__confirm {
+  padding-top: var(--sp-2);
+  border-top: 1px solid var(--line-light);
+}
+
+.hasCompact__confirm > span {
+  min-width: 0;
+  flex: 1;
+}
+
+.hasCompact button:disabled {
+  opacity: .46;
+}
+
 .assetRow__range {
   margin-top: 2px;
   font-size: 9px;

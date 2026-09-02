@@ -29,6 +29,7 @@ import { Art } from '@ui/Art';
 import { NAV_ART, productArt } from '@ui/assets';
 import { grams, preciseGrams, pct, tl, tlBare, tlSigned } from '@ui/format';
 import type { InventoryPosition } from '@domain/types';
+import { WholesalerLiquidationList } from './WholesalerLiquidation';
 
 type Filter = 'all' | 'display' | 'backStock' | 'workshop' | 'dead';
 
@@ -124,6 +125,7 @@ export function StockScreen() {
         {/* Playtest revizyonu §4 — sarrafiye stoklama tezgâhı. */}
         <BullionCounter />
         <HasCounter />
+        <WholesalerSellCounter />
 
         <div className="filterRail">
           {FILTERS.map((f) => (
@@ -405,33 +407,63 @@ function HasCounter() {
   const valid = selectedMg > 0 && selectedMg <= maxMg && total > 0;
   const signature = `${s.market.day}:${side}:${selectedMg}:${total}:${s.ledger.transactions.length}`;
   const changeSide = (next: 'buy' | 'sell') => { setSide(next); setAmountMg(0); setPending(null); };
-  return <section className="group" aria-label="HAS hesabı">
-    <h2 className="group__title">HAS hesabı · {preciseGrams(fromMg(s.store.hasBalanceMg ?? 0))}</h2>
-    <div className="group__body v5Controls">
-      <p>Saflık 1.000 · Değer {tl(fromMg(s.store.hasBalanceMg ?? 0) * s.market.goldSpot)}</p>
-      <p>Toptancıdan al {tl(quote.buy)}/g · Toptancıya sat {tl(quote.sell)}/g</p>
-      <p>{open ? 'Toptancı HAS masası her gün alış ve satışa açık.' : 'Geçersiz işlem günü.'}</p>
-      <div role="group" aria-label="HAS işlem yönü">
-        <button type="button" className="chip" aria-pressed={side === 'buy'} onClick={() => changeSide('buy')}>HAS Al</button>
-        <button type="button" className="chip" aria-pressed={side === 'sell'} onClick={() => changeSide('sell')}>HAS Sat</button>
+  return <section className="group hasCompact" aria-label="HAS hesabı">
+    <div className="hasCompact__head">
+      <div>
+        <h2 className="hasCompact__title">HAS · {preciseGrams(fromMg(s.store.hasBalanceMg ?? 0))}</h2>
+        <span className="hasCompact__value">Değer {tl(fromMg(s.store.hasBalanceMg ?? 0) * s.market.goldSpot)}</span>
       </div>
-      <label className="hasSlider">{side === 'buy' ? 'Seçilen' : 'Satılacak'}: {preciseGrams(qty)}
+      <span className="hasCompact__quote num">Al {tl(quote.buy)}/g<br />Sat {tl(quote.sell)}/g</span>
+    </div>
+    <div className="hasCompact__body">
+      <div className="hasCompact__segments" role="group" aria-label="HAS işlem yönü">
+        <button type="button" className="hasCompact__segment" aria-pressed={side === 'buy'} onClick={() => changeSide('buy')}>HAS Al</button>
+        <button type="button" className="hasCompact__segment" aria-pressed={side === 'sell'} onClick={() => changeSide('sell')}>HAS Sat</button>
+      </div>
+      <label className="hasSlider">
+        <span className="hasCompact__sliderHead">
+          <span>{side === 'buy' ? 'Seçilen' : 'Satılacak'}: <strong>{preciseGrams(qty)}</strong></span>
+          <span>En çok {preciseGrams(fromMg(maxMg))}</span>
+        </span>
         <input type="range" aria-label="HAS miktarı" min={0} max={fromMg(maxMg)} step={0.001} value={qty}
           disabled={maxMg <= 0} onChange={e => { setAmountMg(Math.min(maxMg, Math.max(0, toMg(Number(e.target.value))))); setPending(null); }} />
       </label>
-      <p>0 g — {preciseGrams(fromMg(maxMg))}</p>
-      <p>{side === 'buy' ? 'Yaklaşık Tutar' : 'Alınacak'}: {tl(total)}</p>
-      <button type="button" className="chip" disabled={maxMg <= 0}
-        onClick={() => { setAmountMg(maxMg); setPending(null); }}>{side === 'buy' ? 'MAX AL' : 'TÜM HAS'}</button>
-      <button type="button" className="chip" disabled={!open || !valid} onClick={() => setPending(signature)}>İşleme Devam Et</button>
-      {pending === signature && open && valid && <div role="group" aria-label="HAS işlem onayı">
-        <p>{preciseGrams(qty)} · {tl(total)} — {side === 'buy' ? 'alım' : 'satış'} onayı</p>
-        <button type="button" className="chip" onClick={() => {
+      <div className="hasCompact__actions">
+        <span className="hasCompact__total">{side === 'buy' ? 'Tutar' : 'Alınacak'}<strong className="num">{tl(total)}</strong></span>
+        <button type="button" className="hasCompact__max" disabled={maxMg <= 0}
+          onClick={() => { setAmountMg(maxMg); setPending(null); }}>MAX</button>
+        <button type="button" className="hasCompact__continue" disabled={!open || !valid} onClick={() => setPending(signature)}>Devam Et</button>
+      </div>
+      {pending === signature && open && valid && <div className="hasCompact__confirm" role="group" aria-label="HAS işlem onayı">
+        <span>{preciseGrams(qty)} · {tl(total)} {side === 'buy' ? 'alınacak' : 'satılacak'}</span>
+        <button type="button" className="hasCompact__confirmButton" onClick={() => {
           s.tradeHas(side, qty, `has_${s.market.day}_${s.ledger.transactions.length}_${side}`);
           setPending(null); setAmountMg(0);
-        }}>İşlemi Onayla</button>
-        <button type="button" className="chip" onClick={() => setPending(null)}>Vazgeç</button>
+        }}>Onayla</button>
+        <button type="button" className="hasCompact__cancel" onClick={() => setPending(null)}>Vazgeç</button>
       </div>}
     </div>
   </section>;
+}
+
+function WholesalerSellCounter() {
+  const [open, setOpen] = useState(false);
+  return <div className="counter counter--sell">
+    <button
+      type="button"
+      className="counter__toggle"
+      onClick={() => setOpen((current) => !current)}
+      aria-expanded={open}
+      aria-controls="wholesaler-stock-sale"
+    >
+      <span>Toptancıya Sat</span>
+      <span className="counter__meta">
+        <span className="counter__hint">Sarrafiyeyi nakde çevir</span>
+        <span className={`counter__chevron ${open ? 'counter__chevron--open' : ''}`} aria-hidden="true">▼</span>
+      </span>
+    </button>
+    {open && <div className="counter__list" id="wholesaler-stock-sale">
+      <WholesalerLiquidationList emptyText="Toptancıya satılabilecek sarrafiye yok." />
+    </div>}
+  </div>;
 }
