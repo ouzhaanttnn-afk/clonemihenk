@@ -21,7 +21,7 @@ import { KARAT_LABEL } from '@domain/balance';
 import { CHANNEL_SHORT } from '@domain/thesis';
 import { liquidationEstimate, liquidityBand, liquidityRatio, summarizeWealth } from '@domain/settlement';
 import { getTemplate } from '@data/item-templates';
-import { POOL_SUPPLY, poolSupplyQuote, maxPoolSupplyQuantity, hasPoolSupplySpace } from '@domain/pool-supply';
+import { GRAM_SUPPLY_STEP, POOL_SUPPLY, poolSupplyQuote, maxPoolSupplyQuantity, hasPoolSupplySpace } from '@domain/pool-supply';
 import { useGame } from '@state/gameStore';
 
 import { IconStock, IconWarning, ProductSilhouette } from '@ui/icons';
@@ -217,7 +217,8 @@ export function BullionCatalog({ id }: { id?: string }) {
 function BullionOffer({ product }: { product: typeof POOL_SUPPLY[number] }) {
   const s = useGame();
   const { templateId, name, gramsPerUnit } = product;
-  const [amount, setAmount] = useState(counterMemory.qty[templateId] ?? '1');
+  const initialAmount = counterMemory.qty[templateId] ?? '1';
+  const [amount, setAmount] = useState(templateId === 'gram_gold_1' ? formatGramAmount(initialAmount) : initialAmount);
   const [confirmation, setConfirmation] = useState<string | null>(null);
   const qty = Number(amount.replace(',', '.'));
   const setQty = (next: string) => {
@@ -227,7 +228,7 @@ function BullionOffer({ product }: { product: typeof POOL_SUPPLY[number] }) {
   };
   const lot = poolSupplyQuote(templateId, qty, s.market, s.store);
   const max = useMemo(() => maxPoolSupplyQuantity(templateId, s.market, s.store), [templateId, s.market, s.store]);
-  const sliderStep = templateId === 'gram_gold_1' ? 0.001 : 1;
+  const sliderStep = templateId === 'gram_gold_1' ? GRAM_SUPPLY_STEP : 1;
   const sliderValue = Number.isFinite(qty) ? Math.min(max, Math.max(0, qty)) : 0;
   const unitQuote = lot ?? poolSupplyQuote(templateId, 1, s.market, s.store)!;
   const poolId = poolForTemplate(templateId);
@@ -242,7 +243,7 @@ function BullionOffer({ product }: { product: typeof POOL_SUPPLY[number] }) {
     if (!affordable || !lot) return;
     if (expensive && !confirmed) { setConfirmation(signature); return; }
     s.buyPoolStock(templateId, qty);
-    setQty('1');
+    setQty(templateId === 'gram_gold_1' ? '1.0' : '1');
   };
   return <section className="offerRow" aria-label={name}>
     <div className="offerRow__head">
@@ -252,8 +253,8 @@ function BullionOffer({ product }: { product: typeof POOL_SUPPLY[number] }) {
     <div className="offerRow__meta">Stokta {gramsPerUnit ? preciseGrams(held) : `${held} adet`}</div>
     <div className="offerRow__controls">
       {templateId === 'gram_gold_1'
-        ? <label className="poolAmount">Gram <input aria-label="Gram Altın miktarı" type="text" inputMode="decimal" value={amount}
-            onChange={e => setQty(e.target.value)} /></label>
+        ? <label className="poolAmount">Gram <input aria-label="Gram Altın miktarı" type="number" inputMode="decimal" min={GRAM_SUPPLY_STEP} step={GRAM_SUPPLY_STEP} value={amount}
+            onChange={e => setQty(e.target.value)} onBlur={() => setQty(formatGramAmount(amount))} /></label>
         : <div className="qtyStep" role="group" aria-label={`${name} miktarı`}>
           <button type="button" className="qtyStep__btn" aria-label={gramsPerUnit ? '10 gram azalt' : 'Bir adet azalt'}
             disabled={qty <= 1} onClick={() => setQty(String(Math.max(1, qty - 1)))}>−</button>
@@ -265,18 +266,23 @@ function BullionOffer({ product }: { product: typeof POOL_SUPPLY[number] }) {
       <button type="button" className="offerRow__buy" disabled={!affordable} onClick={buy}>{expensive && confirmed ? 'Onayla' : 'Al'}</button>
     </div>
     <label className="poolSlider">
-      <span>Seçilen: {gramsPerUnit ? `${sliderValue * gramsPerUnit} g` : `${sliderValue} adet`}</span>
+      <span>Seçilen: {gramsPerUnit ? `${(sliderValue * gramsPerUnit).toFixed(1)} g` : `${sliderValue} adet`}</span>
       <input type="range" aria-label={`${name} miktar sliderı`} min={0} max={max} step={sliderStep} value={sliderValue}
         disabled={max <= 0 || !space}
-        onChange={e => setQty(templateId === 'gram_gold_1' ? Number(e.target.value).toFixed(3).replace(/0+$/, '').replace(/\.$/, '') : String(Math.round(Number(e.target.value))))} />
-      <span className="poolSlider__range">0 — {gramsPerUnit ? `${max * gramsPerUnit} g` : `${max} adet`}</span>
+        onChange={e => setQty(templateId === 'gram_gold_1' ? Number(e.target.value).toFixed(1) : String(Math.round(Number(e.target.value))))} />
+      <span className="poolSlider__range">0 — {gramsPerUnit ? `${(max * gramsPerUnit).toFixed(1)} g` : `${max} adet`}</span>
     </label>
     {expensive && confirmed && <p className="offerRow__confirm" role="status">Yüksek tutar: {tl(lot.totalPrice)}. Satın almak için tekrar onayla.</p>}
-    {!lot && <p className="offerRow__shortfall">Pozitif, geçerli bir miktar seçin. Gram altın hassasiyeti 0,001 g.</p>}
+    {!lot && <p className="offerRow__shortfall">Pozitif, geçerli bir miktar seçin. Gram altın hassasiyeti 0,1 g.</p>}
     {lot && !affordable && <p className="offerRow__shortfall">{!space
       ? 'Arka stokta yeni ürün ailesi için yer yok.'
-      : `Minimum ${templateId === 'gram_gold_1' ? '0,001 g' : '1 adet'} · Yetersiz Nakit · ${tl(lot.totalPrice)} gerekli, ${tl(s.store.cash)} mevcut`}</p>}
+      : `Minimum ${templateId === 'gram_gold_1' ? '0,1 g' : '1 adet'} · Yetersiz Nakit · ${tl(lot.totalPrice)} gerekli, ${tl(s.store.cash)} mevcut`}</p>}
   </section>;
+}
+
+function formatGramAmount(value: string): string {
+  const parsed = Number(value.replace(',', '.'));
+  return Number.isFinite(parsed) ? Math.max(GRAM_SUPPLY_STEP, parsed).toFixed(1) : '1.0';
 }
 
 /** Uncommitted UI choice survives tab changes; inventory is always held in game state. */

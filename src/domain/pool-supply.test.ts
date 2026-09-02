@@ -20,7 +20,7 @@ describe('cash-only three-family pooled counter', () => {
   it('has exactly three canonical families', () => {
     expect(POOL_SUPPLY.map(p => p.templateId)).toEqual(['gram_gold_1', 'quarter_gold', 'investment_bangle_22k_10']);
   });
-  it.each([1, 2.5, 7, 40, 135, 135.25, .001])('buys %s grams into the one pool and pays the quoted total', qty => {
+  it.each([.1, 1, 2.5, 7, 40, 135, 135.2])('buys %s grams into the one pool and pays the quoted total', qty => {
     const s = useGame.getState();
     const quote = poolSupplyQuote('gram_gold_1', qty, s.market, s.store)!;
     s.buyPoolStock('gram_gold_1', qty);
@@ -28,6 +28,9 @@ describe('cash-only three-family pooled counter', () => {
     expect(useGame.getState().inventory[0]?.quantityMg).toBe(Math.round(qty * 1000));
     expect(useGame.getState().store.cash).toBe(s.store.cash - quote.totalPrice);
     expect(useGame.getState().inventory[0]?.costBasis).toBeCloseTo(quote.totalPrice, 8);
+  });
+  it.each([.001, .01, 2.55, 8.034])('rejects gram quantities with more than one decimal: %s', qty => {
+    expect(validPoolSupplyQuantity('gram_gold_1', qty)).toBe(false);
   });
   it.each([1, 10, 40, 135, 250])('buys %s quarters without a lot cap', qty => {
     useGame.getState().buyPoolStock('quarter_gold', qty);
@@ -64,8 +67,8 @@ describe('cash-only three-family pooled counter', () => {
   it.each(POOL_SUPPLY.map(p => p.templateId))('maximum for %s uses the actual volume-aware quote and cash', templateId => {
     const s = useGame.getState();
     const max = maxPoolSupplyQuantity(templateId, s.market, s.store);
-    const step = templateId === 'gram_gold_1' ? .001 : 1;
-    const over = Math.round((max + step) * 1000) / 1000;
+    const step = templateId === 'gram_gold_1' ? .1 : 1;
+    const over = Math.round((max + step) * 10) / 10;
     expect(poolSupplyQuote(templateId, max, s.market, s.store)!.totalPrice).toBeLessThanOrEqual(s.store.cash);
     expect(poolSupplyQuote(templateId, over, s.market, s.store)!.totalPrice).toBeGreaterThan(s.store.cash);
     s.buyPoolStock(templateId, over);
@@ -76,9 +79,9 @@ describe('cash-only three-family pooled counter', () => {
     useGame.setState({ store: { ...useGame.getState().store, backStockSlots: 1 } });
     useGame.getState().buyPoolStock('gram_gold_1', 7);
     useGame.getState().buyPoolStock('quarter_gold', 1);
-    useGame.getState().buyPoolStock('gram_gold_1', 135.25);
+    useGame.getState().buyPoolStock('gram_gold_1', 135.2);
     expect(useGame.getState().inventory).toHaveLength(1);
-    expect(useGame.getState().inventory[0]?.quantityMg).toBe(142250);
+    expect(useGame.getState().inventory[0]?.quantityMg).toBe(142200);
   });
   function intake(): SettlementTransaction {
     const s = useGame.getState(), quantity = 10;
