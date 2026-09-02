@@ -8,6 +8,9 @@ import type { ItemInstance, MarketState, StoreState } from './types';
 export const POOL_SUPPLY = [
   { templateId: 'gram_gold_1', name: 'Gram Altın', gramsPerUnit: 1 },
   { templateId: 'quarter_gold', name: 'Çeyrek Altın', gramsPerUnit: 0 },
+  { templateId: 'half_gold', name: 'Yarım Altın', gramsPerUnit: 0 },
+  { templateId: 'republic_gold', name: 'Cumhuriyet Altını', gramsPerUnit: 0 },
+  { templateId: 'ata_gold', name: 'Ata Lira', gramsPerUnit: 0 },
   { templateId: 'investment_bangle_22k_10', name: '22 Ayar İşçiliksiz Yatırım Bileziği', gramsPerUnit: 10 },
 ] as const;
 /** Sarrafiye gram alımında oyuncuya gösterilen ve kabul edilen en küçük adım. */

@@ -1492,7 +1492,7 @@ export const useGame = create<GameState>((set, get) => {
       );
     },
 
-    /** Three canonical cash-only counter families; transaction revalidates quote, cash and physical space. */
+    /** Canonical cash-only counter families; transaction revalidates quote, cash and physical space. */
     buyPoolStock: (templateId, quantity) => {
       const s = get();
       const quote = poolSupplyQuote(templateId, quantity, s.market, s.store);

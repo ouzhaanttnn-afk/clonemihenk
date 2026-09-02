@@ -21,7 +21,7 @@
 
 import { createMarketForDay } from '@domain/market';
 import { isMarketOpen } from '@domain/calendar';
-import { consolidatePools, poolForTemplate, poolUnitGrams } from '@domain/stock-pools';
+import { consolidatePools, isMassPool, poolForTemplate, poolUnitGrams } from '@domain/stock-pools';
 import { bullionMeta } from '@data/bullion';
 import type { CustomerDemand } from '@domain/types';
 import { dayCharacter, emptyTelemetry } from '@domain/intent';
@@ -269,7 +269,7 @@ export function migrate(file: SaveFile): SaveFile {
     if (!d || d.poolId || d.targetInventoryItemId || !d.templateId) return d;
     const poolId = poolForTemplate(d.templateId);
     if (!poolId) return d;
-    const factor = poolId === 'QUARTER_GOLD_POOL' ? 1 : bullionMeta(d.templateId)!.unitWeightGrams / poolUnitGrams(poolId);
+    const factor = isMassPool(poolId) ? bullionMeta(d.templateId)!.unitWeightGrams / poolUnitGrams(poolId) : 1;
     return { ...d, poolId, quantity: d.quantity * factor, minQuantity: d.minQuantity * factor,
       summary: poolId === '24K_GRAM_GOLD_POOL' ? `${d.quantity * factor} gram altın` : poolId === '22K_INVESTMENT_BANGLE_POOL' ? `${d.quantity * factor * 10} gram 22 ayar işçiliksiz bilezik` : d.summary,
       templateId: poolId === '24K_GRAM_GOLD_POOL' ? 'gram_gold_1' : poolId === '22K_INVESTMENT_BANGLE_POOL' ? 'investment_bangle_22k_10' : d.templateId };

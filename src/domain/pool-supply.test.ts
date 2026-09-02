@@ -17,8 +17,15 @@ beforeEach(() => {
 afterEach(() => { useGame.setState(initial, true); vi.unstubAllGlobals(); });
 
 describe('cash-only three-family pooled counter', () => {
-  it('has exactly three canonical families', () => {
-    expect(POOL_SUPPLY.map(p => p.templateId)).toEqual(['gram_gold_1', 'quarter_gold', 'investment_bangle_22k_10']);
+  it('has the canonical player-sellable supply families', () => {
+    expect(POOL_SUPPLY.map(p => p.templateId)).toEqual([
+      'gram_gold_1',
+      'quarter_gold',
+      'half_gold',
+      'republic_gold',
+      'ata_gold',
+      'investment_bangle_22k_10',
+    ]);
   });
   it.each([.1, 1, 2.5, 7, 40, 135, 135.2])('buys %s grams into the one pool and pays the quoted total', qty => {
     const s = useGame.getState();
@@ -35,6 +42,15 @@ describe('cash-only three-family pooled counter', () => {
   it.each([1, 10, 40, 135, 250])('buys %s quarters without a lot cap', qty => {
     useGame.getState().buyPoolStock('quarter_gold', qty);
     expect(useGame.getState().inventory[0]?.quantity).toBe(qty);
+  });
+  it.each(['half_gold', 'republic_gold', 'ata_gold'] as const)('buys and stacks requested coin stock: %s', templateId => {
+    useGame.getState().buyPoolStock(templateId, 2);
+    useGame.getState().buyPoolStock(templateId, 1);
+    const position = useGame.getState().inventory[0];
+    expect(position?.quantity).toBe(3);
+    expect(position?.poolId).toBe(
+      templateId === 'half_gold' ? 'HALF_GOLD_POOL' : templateId === 'republic_gold' ? 'REPUBLIC_GOLD_POOL' : 'ATA_GOLD_POOL',
+    );
   });
   it.each([0, -1, .5, 135.5, NaN, Infinity])('rejects invalid quarter quantity %s without financial mutations', qty => {
     const s = useGame.getState();
