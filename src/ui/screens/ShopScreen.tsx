@@ -96,6 +96,7 @@ import {
   IconWarning,
   IconWholesale,
   IconWorkshop,
+  IconBusiness,
 } from '@ui/icons';
 import { Art } from '@ui/Art';
 import { customerArt, NAV_ART } from '@ui/assets';
@@ -118,6 +119,7 @@ import type {
   PurchaseSession,
   WorkbenchStage,
 } from '@domain/types';
+import { TalentTreePanel } from './TalentTreePanel';
 
 const TOOL_ICON: Record<string, typeof IconScale> = {
   scale: IconScale,
@@ -480,6 +482,7 @@ function QuickStockSheet({ onClose }: { onClose: () => void }) {
  */
 function IdleWorkbench({ coaching }: { coaching: boolean }) {
   const s = useGame();
+  const [talentTreeOpen, setTalentTreeOpen] = useState(false);
   const liquidity = selectors.liquidity(s);
   const band = selectors.liquidityBand(s);
 
@@ -575,6 +578,12 @@ function IdleWorkbench({ coaching }: { coaching: boolean }) {
           </div>
         </div>
 
+        <button type="button" className="shopTalentButton" onClick={() => setTalentTreeOpen(true)}>
+          <span><IconBusiness size={18} /> Yetenek Ağacı</span>
+          <small>Ayar %{Math.round(s.skillProgress.assayAccuracyRank === 0 ? 60 : 60 + s.skillProgress.assayAccuracyRank * 10)} · Tatlı Dil {s.skillProgress.tatliDilLevel}/3</small>
+          <span aria-hidden="true">›</span>
+        </button>
+
         <button type="button" className="position" onClick={() => s.setTab('stock')}>
           <span className="position__cell">
             <span className="position__icon" aria-hidden="true"><IconCash size={15} /></span>
@@ -647,6 +656,19 @@ function IdleWorkbench({ coaching }: { coaching: boolean }) {
           Dükkânı Canlandır
         </button>
       )}
+
+      {talentTreeOpen ? (
+        <div className="talentTreeScrim" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setTalentTreeOpen(false); }}>
+          <section className="talentTreeSheet" role="dialog" aria-modal="true" aria-labelledby="shop-talent-title">
+            <header className="talentTreeSheet__head">
+              <div><span>Uzmanlık</span><h2 id="shop-talent-title">Yetenek Ağacı</h2></div>
+              <button type="button" onClick={() => setTalentTreeOpen(false)} aria-label="Yetenek ağacını kapat">×</button>
+            </header>
+            <div className="talentTreeSheet__scroll"><TalentTreePanel /></div>
+            <button type="button" className="talentTreeSheet__done" onClick={() => setTalentTreeOpen(false)}>Dükkana Dön</button>
+          </section>
+        </div>
+      ) : null}
     </div>
   );
 }

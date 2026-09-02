@@ -1046,6 +1046,26 @@
   vertical-align: middle;
 }
 
+.shopTalentButton {
+  width: 100%;
+  min-height: var(--touch-min);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 0 var(--sp-2);
+  border: 1px solid rgba(151, 91, 213, 0.34);
+  border-radius: var(--r-sm);
+  background: linear-gradient(90deg, rgba(104, 63, 160, 0.2), rgba(8, 11, 15, 0.16));
+  color: var(--text-dark-1);
+  font: inherit;
+  text-align: left;
+}
+
+.shopTalentButton > span:first-child { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-caption); font-weight: var(--fw-semibold); white-space: nowrap; }
+.shopTalentButton small { overflow: hidden; color: var(--text-dark-3); font-size: var(--fs-micro); text-align: right; text-overflow: ellipsis; white-space: nowrap; }
+.shopTalentButton > span:last-child { color: var(--brass-300); font-size: 21px; }
+
 /* ---- Pozisyon paneli — sarrafın "kaç param, kaç malım var" sorusu ---- */
 
 .shopOverview {

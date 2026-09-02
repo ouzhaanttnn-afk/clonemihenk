@@ -1502,6 +1502,90 @@
 
 .marketProduct__owned { color: var(--positive-soft); font-size: var(--fs-caption); font-weight: var(--fw-semibold); }
 
+/* Yetenek ağacı — Dükkan sheet'i ve İşletme rotası aynı mekanik görünümü paylaşır. */
+.talentTree {
+  display: grid;
+  gap: var(--sp-3);
+}
+
+.talentNode {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  border: 1px solid rgba(242, 236, 222, 0.13);
+  border-radius: var(--r-card);
+  background: rgba(8, 11, 15, 0.5);
+}
+
+.talentNode--active { border-color: rgba(215, 170, 74, 0.48); }
+
+.talentNode__icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(215, 170, 74, 0.28);
+  border-radius: 13px;
+  background: radial-gradient(circle, rgba(104, 63, 160, 0.25), rgba(7, 10, 15, 0.7));
+}
+
+.talentNode__body { min-width: 0; }
+.talentNode__heading { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-2); }
+.talentNode__heading strong { color: var(--text-dark-1); font-family: var(--font-display); font-size: var(--fs-label); }
+.talentNode__heading > span { flex: 0 0 auto; color: var(--brass-300); font-size: var(--fs-micro); }
+.talentNode p { margin: 4px 0 var(--sp-2); color: var(--text-dark-3); font-size: var(--fs-micro); line-height: 1.4; }
+.talentNode p b { color: var(--text-dark-1); }
+
+.talentSteps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.talentStep {
+  min-height: 25px;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-dark-3);
+  font-size: 10px;
+}
+.talentStep--earned { background: rgba(215, 170, 74, 0.14); color: var(--brass-300); }
+
+.talentLevels { display: grid; gap: 4px; }
+.talentLevel { display: grid; grid-template-columns: 24px 1fr; gap: var(--sp-2); color: var(--text-dark-3); font-size: 10px; line-height: 1.35; }
+.talentLevel b { width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.05); }
+.talentLevel--earned { color: var(--text-dark-1); }
+.talentLevel--earned b { background: var(--brass-500); color: #171006; }
+.talentTree__note { margin: 0; color: var(--text-dark-3); font-size: var(--fs-micro); line-height: 1.45; }
+
+.talentTreeScrim {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: end center;
+  background: rgba(3, 6, 10, 0.72);
+  backdrop-filter: blur(7px);
+}
+
+.talentTreeSheet {
+  width: min(430px, 100%);
+  max-height: min(720px, 88dvh);
+  display: flex;
+  flex-direction: column;
+  padding: var(--sp-4);
+  border: 1px solid rgba(215, 170, 74, 0.56);
+  border-bottom: 0;
+  border-radius: var(--r-sheet) var(--r-sheet) 0 0;
+  background: linear-gradient(165deg, #18212d, #090e15 64%);
+  box-shadow: 0 -18px 50px rgba(0, 0, 0, 0.55);
+}
+
+.talentTreeSheet__head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-3); }
+.talentTreeSheet__head span { color: var(--brass-300); font-size: var(--fs-micro); text-transform: uppercase; letter-spacing: 0.08em; }
+.talentTreeSheet__head h2 { margin: 2px 0 0; color: var(--text-dark-1); font-family: var(--font-display); font-size: var(--fs-title); }
+.talentTreeSheet__head button { width: var(--touch-min); height: var(--touch-min); border: 1px solid rgba(255,255,255,.14); border-radius: 50%; background: rgba(255,255,255,.05); color: var(--text-dark-1); font-size: 25px; }
+.talentTreeSheet__scroll { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.talentTreeSheet__done { min-height: var(--touch-min); margin-top: var(--sp-3); border: 1px solid var(--brass-400); border-radius: var(--r-pill); background: linear-gradient(180deg, #e8b94b, #ae7818); color: #211706; font-weight: var(--fw-bold); }
+
 .marketConfirmScrim {
   position: fixed;
   inset: 0;
