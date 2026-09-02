@@ -114,16 +114,17 @@ export function CustomerStrip({ customer, record, queueLength, lineCount, brough
 
 /**
  * Sabır göstergesi. GDD 11.3 — "matematiksel skor oyuncuya gösterilmez".
- * Beş nokta; renk düşük sabırda uyarıya döner.
+ * Nokta sayısı gerçek sabır puanıdır; Tatlı Dil bonusu burada görünür.
  */
 export function PatienceDots({ value, max }: { value: number; max: number }) {
   const ratio = Math.max(0, Math.min(1, value / Math.max(1, max)));
-  const filled = Math.ceil(ratio * 5);
+  const total = Math.max(1, Math.min(7, Math.round(max)));
+  const filled = Math.max(0, Math.min(total, Math.ceil(value)));
   const tone = ratio <= 0.2 ? 'critical' : ratio <= 0.45 ? 'low' : 'on';
 
   return (
-    <div className="patience" aria-label={`Sabır: ${filled}/5`} title="Müşteri sabrı">
-      {[0, 1, 2, 3, 4].map((i) => (
+    <div className="patience" aria-label={`Sabır: ${filled}/${total}`} title={`Müşteri sabrı ${filled}/${total}`}>
+      {Array.from({ length: total }, (_, i) => (
         <span
           key={i}
           className={`patience__dot ${i < filled ? `patience__dot--${tone}` : ''}`}

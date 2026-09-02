@@ -142,6 +142,7 @@ import {
 } from '@domain/marketplace';
 import {
   defaultSkillProgress,
+  tatliDilEffect,
   toolWithSkillBonuses,
   type SkillProgress,
 } from '@domain/skill-tree';
@@ -627,6 +628,7 @@ export const useGame = create<GameState>((set, get) => {
           s.dayCharacter,
           s.customers,
           { inventory: s.inventory, items: s.items },
+          s.skillProgress,
         );
         const valid = spawned.customer.intent === 'buy' ? !!spawned.customer.demand : spawned.items.length > 0;
         if (valid) {
@@ -1329,6 +1331,7 @@ export const useGame = create<GameState>((set, get) => {
         fairValue: haggle.fairValue,
         haggleRoom: haggle.room,
         retailSpread: haggle.retailSpread,
+        patienceLossTolerated: !!tatliDilEffect(s.skillProgress).patienceLossTolerated,
       };
 
       const { session, response } = applyMove(line.negotiation, ctx, move);

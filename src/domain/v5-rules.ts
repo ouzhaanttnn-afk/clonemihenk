@@ -15,6 +15,15 @@ export const personnelCount = (store: StoreState): number => Math.min(3, Math.ma
 export const queueCapacity = (store: StoreState): number => Math.min(10, 4 + personnelCount(store) * 2);
 export const personnelDaily = (store: StoreState): number => PERSONNEL_MONTHLY[personnelCount(store)]! / 30;
 export const dailyOperatingCost = (store: StoreState): number => roundMoney(store.dailyOverhead + personnelDaily(store));
+export const SCALE_MAINTENANCE_INTERVAL_DAYS = 30;
+export const scaleMaintenanceCost = (store: StoreState, day: number): number =>
+  day > 0 && day % SCALE_MAINTENANCE_INTERVAL_DAYS === 0
+    ? roundMoney(10_000 + Math.max(0, store.level - 1) * 2_500)
+    : 0;
+export const dueScaleMaintenanceDebt = (store: StoreState, day: number): number =>
+  roundMoney(store.payables
+    .filter(payable => payable.id.startsWith('scale_maintenance_') && payable.dueDay <= day)
+    .reduce((sum, payable) => sum + payable.amount, 0));
 export const weekdayName = weekdayLabel;
 
 export function dailyTraffic(seed: number, day: number) {
